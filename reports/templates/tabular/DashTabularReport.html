@@ -1,0 +1,214 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% block content %}
+<section>
+    <div class="container mt-2 border border-danger p-3">
+	      <!-- Page Header-->
+	    <header> 
+	        <ol class="breadcrumb mb-1 mt-1">
+	          <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+	          <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+	        </ol>
+	    </header>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card shadow-lg pt-1 rounded">
+						<div class="card-body">
+							<center>
+								<h3>{{ title|upper }}</h3>
+							</center>
+							<hr/>
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="card bg-primary">
+										<div class="card-body" style="color: white;">
+											<center> SURVEY <h2 style="margin-bottom: 0;">
+												<a href="{% url 'ReportAllAprovedSurvey' %}" style="color: white; text-decoration: underline;">{{ tot_survey }}</a>
+											</h2></center>
+										</div>
+									</div>
+								</div><!--end col-->
+								<div class="col-sm-6">
+									<div class="card bg-info">
+										<div class="card-body" style="color: white;">
+											<center> IMPLEMENTASAUN PROGRAMA <h2 style="margin-bottom: 0;">
+												<a href="{% url 'ReportAllAprovedImplementation' %}" style="color: white; text-decoration: underline;">{{ tot_implementasaun }}</a>
+											</h2></center>
+										</div>
+									</div>
+								</div><!--end col-->
+							</div>
+							<hr/>
+							<div class="row">
+								<div class="col-sm-4">
+									<div class="card">
+										<div class="card-body">
+		                                    <h5 align="center">Total Implementasaun Programa</h5><hr/>
+											<table class="table table-sm responsive table-bordered" style="width:100%">
+												<thead>
+													<tr>
+														<th class="text-center">Nu</th>
+														<th class="text-center">Programa</th>
+		                                                <th class="text-center">Total</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for data in sumariuPrograma %}
+													<tr>
+														<td class="text-center">{{ forloop.counter }}</td>
+														<td> {{ data.naran }}</td>
+		                                                <td class="text-center"><a href="{% url 'ReportImplementasaunPrograma' data.hashed %}">{{ data.totalImplementasaun }}</a></td>
+		                                            </tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div> <!--end col-->
+								<div class="col-sm-8">
+									<div class="card">
+										<div class="card-body">
+											<h5 align="center">Total Progressu Implementasaun Programa</h5><hr/>
+											<section id='no-more-tables'>
+												<table id="#" class="table table-sm" style="width:100%">
+													<tr class="text-center">
+														<th rowspan="2">Nu</th>
+														<th rowspan="2">Programa</th>
+														<th colspan="5">Status</th>
+													</tr>
+													<tr class="text-center">
+														{% for i in statusList %}
+														<th>{{i}}</th>
+														{% endfor %}
+													</tr>
+													{% for data in statusPrograma %}
+													<tr class="text-center">
+		                                                <td>{{forloop.counter}}</td>
+		                                                <td>{{data.naran}}</td>
+		                                                {% for a in data.sumariuStatus %}<td><a href="{% url 'ReportStatusImplementasaunPrograma' data.hashed a.statusName %}">{{a.totalStatus}}</a></td>{% endfor %}
+													</tr>
+													{%endfor%}
+												</table>
+											</section>
+										</div>
+									</div>
+								</div>
+							</div>
+							<hr/>
+							<div class="row">
+								<div class="col-sm-4">
+									<div class="card">
+										<div class="card-body">
+		                                    <h5 align="center">Dadus Implementasaun tuir Tinan</h5><hr/>
+											<table id="#" class="table table-bordered table-sm" style="width:100%">
+					                            <tr>
+					                                <th>Nu</th>
+					                                <th>Tinan</th>
+					                                {% for i in listaPrograma %}
+					                                <th>{{i.naran}}</th>
+					                                {% endfor %}
+					                            </tr>
+					                            {% for year in implementasaun_years %}
+					                            <tr>
+					                                <td data-title="Nu.">{{ forloop.counter }}</td>
+					                                <td data-title="Tinan">{{ year.0 }}</td>
+					                                {% for year2 in year.1 %}
+					                                    <td class="text-center"><a href="{% url 'ReportTinanImplementasaunPrograma' year.0 year2.0 %}">{{ year2.1 }}</a></td>
+					                                {% endfor %}
+					                            </tr>
+					                            {% endfor %}
+					                        </table>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-8">
+									{% if request.user.groups.all.0.name == 'fun' %}
+									<div class="card">
+										<div class="card-body">
+		                                    <h5 align="center">Dadus Implementasaun tuir Suku</h5><hr/>
+											<table class="table table-sm responsive table-bordered" style="width:100%">
+												<thead>
+													<tr class="text-center">
+														<th rowspan="2">Nu</th>
+														<th rowspan="2">Programa</th>
+														<th colspan="{{listaArea|length}}">Suku</th>
+													</tr>
+													<tr class="text-center">
+														{% for i in listaArea %}
+														<th>{{i.name}}</th>
+														{% endfor %}
+													</tr>
+												</thead>
+												<tbody>
+													{% for data in sumariuMunisipiu %}
+													<tr class="text-center">
+														<td>{{ forloop.counter }}</td>
+														<td> {{ data.naran }}</td>
+														{% for data2 in data.totalImplementasaunMun %}
+														<td><a href="{% url 'ReportSukuImplementasaunPrograma' data.hashed data2.idSuku %}">{{ data2.totalData }}</a></td>
+														{% endfor %}
+													</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</div>
+									</div>
+									{% endif %}
+									{% if request.user.groups.all.0.name == 'admin' or request.user.groups.all.0.name == 'dir' %}
+									<div class="card">
+										<div class="card-body">
+		                                    <h5 align="center">Dadus Implementasaun tuir Munisipiu</h5><hr/>
+		                                    <div class="table-responsive">
+											<table class="table table-sm responsive table-bordered" style="width:100%">
+												<thead>
+													<tr class="text-center">
+														<th rowspan="2">Nu</th>
+														<th rowspan="2">Programa</th>
+														<th colspan="{{listaArea|length}}">Munisipiu</th>
+													</tr>
+													<tr class="text-center">
+														{% for i in listaArea %}
+														<th>{{i.name}}</th>
+														{% endfor %}
+													</tr>
+												</thead>
+												<tbody>
+													{% for data in sumariuMunisipiu %}
+													<tr class="text-center">
+														<td>{{ forloop.counter }}</td>
+														<td> {{ data.naran }}</td>
+														{% for data2 in data.totalImplementasaunMun %}
+														<td><a href="{% url 'ReportMunisipiuImplementasaunPrograma' data.hashed data2.idMun %}">{{ data2.totalData }}</a></td>
+														{% endfor %}
+													</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+											</div>
+										</div>
+									</div>
+									{% endif %}
+								</div>
+								
+
+
+					 <!--end col-->
+							</div><!--end row-->
+							
+						</div> <!--end card-body-->
+					</div> <!--end card-->
+				</div> <!--end col-->
+			</div> <!--end row-->
+	</div>
+</section>
+{% endblock %}
+{% block scripts %}
+<!-- Charts-->
+<script type="text/javascript">
+	$(document).ready( function () {
+		var table = $('#example').removeAttr('width').DataTable( {
+			
+		});
+	} );
+</script>
+{% endblock %}

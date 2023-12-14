@@ -1,0 +1,215 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+	<section>
+        <div class="container mt-4 border border-danger p-3">
+          <!-- Page Header-->
+          <header> 
+            <ol class="breadcrumb mb-1 mt-1">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'ListaSurvey' %}">Lista Survey</a></li>
+              <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+            </ol>
+          </header>
+                    {% if messages %}
+                        {% for message in messages %} 
+                            <div id="divmessage" class="alert alert-{{ message.tags }} alert-dismissable">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                              {{message}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+          <div class="row">
+            <div class="col-sm-6">
+                <div class="card shadow-lg pt-1 border-success rounded">
+                    <div class="card-header d-flex justify-content-between">
+                      <b>Informasaun Survey</b>
+                      <div>
+                        {% if surveyData.is_sent == False and surveyData.is_rejected == False %}
+                          {% if surveyData.is_locked == False %}
+                            <a href="{% url 'UpdateSurvey' surveyData.hashed 'detail' %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a>
+                            <a href="{% url 'lockSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a>
+                          {% else %}
+                            <a href="{% url 'mandaSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a>
+                            <a href="{% url 'unlockSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a>
+                          {% endif %}
+                        {% endif %}
+                        {% if surveyData.is_sent == False and surveyData.is_rejected == True %}
+                          {% if surveyData.is_locked == False %}
+                            <a href="{% url 'UpdateSurvey' surveyData.hashed 'detail' %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a>
+                            <a href="{% url 'lockSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a>
+                          {% else %}
+                            <a href="{% url 'mandaSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a>
+                            <a href="{% url 'unlockSurveyData' surveyData.hashed 'detail' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <tr><th>Munisipiu</th><td>: {{ surveyData.municipality }}</td></tr>
+                            <tr><th>Postu</th><td>: {{ surveyData.administrativepost }}</td></tr>
+                            <tr><th>Suku</th><td>: {{ surveyData.village }}</td></tr>
+                            <tr><th>Programa</th><td>: {{ surveyData.programa }}</td></tr>
+                            <tr><th>Orsamentu Alokasaun</th><td>: {{ surveyData.montanteOsanAlokasaun }}</td></tr>
+                            <tr><th>Status</th><td>: {{ surveyData.statusImplementasaun }}</td></tr>
+                            <tr><th>Progressu</th><td>: {{ surveyData.address }}</td></tr>
+                        </table>
+                        <hr/>
+                        {% if surveyData.image %}
+                          <a href="{{surveyData.image.url}}" target="_blank"><img src="{{surveyData.image.url}}" width="150px" height="150px"></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div><!--end col-->
+            <div class="col-sm-6">
+              
+            </div><!--end col-->
+          </div><!--end row-->
+          <hr>
+          <div class="row mt-3">
+            <div class="col-sm-12 mb-5">
+                <div class="card shadow-lg pt-1 border-success rounded">
+                    <div class="card-header d-flex justify-content-between">
+                      <b>Detallu Progresu Implementasaun</b>
+                      {% if surveyData.is_approved %}
+                        {% if request.user.groups.all.0.name == 'fun' or request.user.groups.all.0.name == 'eip' %}
+                      <a href="{% url 'addMonitoringImplementasaun' surveyData.hashed %}" class="btn btn-sm btn-info"><span class="fa fa-plus-square"> </span> Adisiona</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table id=""  class="table table-hover table-striped">
+                          <thead>
+                            <tr>
+                              <th>Nu</th>
+                              <th>Data</th>
+                              <th>Progresu</th>
+                              <th class="text-center"><i class="fa fa-image"></i></th>
+                              <th>Faze</th>
+                              <th>Siklu</th>
+                              <th>Gastus</th>
+                              <th>Status</th>
+                              <th class="text-center">Asaun</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for data in surveyData.getImpelementationMonitoring %}
+                            <tr>
+                              <th scope="row">{{ forloop.counter }}</th>
+                              <td>{{ data.monitoring_date|date:'d M Y' }}</td>
+                              <td>{{ data.pursentu_programa }} %</td>
+                              <td class="text-center">{% if data.image %}<a href="{{data.image.url}}" target="_blank"><img src="{{data.image.url}}" width="50px" height="50px"></a>{%else%}{%endif%}</td>
+                              <td>{{ data.faze }}</td>
+                              <td>{{ data.siklu }}</td>
+                              <td>{{ data.orsamentu_gastu }}</td>
+                              <td>{{ data.statusImplementasaun }}</td>
+                              <td>
+                                <div class="d-flex justify-content-center"> 
+                                  {% if data.is_sent == False and data.is_rejected == False %}
+                                    {% if data.is_locked == False %}
+                                    <div class="flex-fill mr-1"><a href="{% url 'updateMonitoringImplementasaun' data.hashed  %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'lockMonitoringImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a></div>
+                                    {% else %}
+                                    <div class="flex-fill mr-1"><a href="{% url 'mandaMonitoringImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'unlockMonitoringImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a></div>
+                                    {% endif %}
+                                  {% else %}
+                                    {% if data.is_approved == True %}
+                                      Aprova ona
+                                    {% else %}
+                                      Manda ona
+                                    {% endif %}
+                                  {% endif %}
+                                </div>  
+                              </td>
+                            </tr>
+                            {% endfor %}
+
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                </div>
+            </div><!--end col-->
+            <div class="col-sm-12">
+                <div class="card shadow-lg pt-1 border-success rounded">
+                    <div class="card-header d-flex justify-content-between">
+                      <b>Detallu Monitorizasaun Post Implementasaun</b>
+                      {% if surveyData.is_approved %}
+                        {% if request.user.groups.all.0.name == 'fun' or request.user.groups.all.0.name == 'eip' %}
+                      <a href="{% url 'addPostMonitoringImplementasaun' surveyData.hashed %}" class="btn btn-sm btn-info"><span class="fa fa-plus-square"> </span> Adisiona</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table id="example"  class="table table-hover table-striped">
+                          <thead>
+                            <tr>
+                              <th>Nu</th>
+                              <th>Data</th>
+                              <th class="text-center"><i class="fa fa-image"></i></th>
+                              <th>Kondisaun</th>
+                              <th>Deskrisaun</th>
+                              <th>Rekomendasaun</th>
+                              <th class="text-center">Asaun</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for data in surveyData.getPostImpelementationMonitoring %}
+                            <tr>
+                              <th scope="row">{{ forloop.counter }}</th>
+                              <td>{{ data.monitoring_date|date:'d M Y' }}</td>
+                              <td class="text-center">{% if data.image %}<a href="{{data.image.url}}" target="_blank"><img src="{{data.image.url}}" width="50px" height="50px"></a>{%else%}{%endif%}</td>
+                              <td>{{ data.kondisaun }}</td>
+                              <td>{{ data.komentariu }}</td>
+                              <td>{{ data.rekomendasaun }}</td>
+                              <td>
+                                <div class="d-flex justify-content-center"> 
+                                  {% if data.is_sent == False and data.is_rejected == False %}
+                                    {% if data.is_locked == False %}
+                                    <div class="flex-fill mr-1"><a href="{% url 'updateMonitoringPostImplementasaun' data.hashed  %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'lockMonitoringPostImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a></div>
+                                    {% else %}
+                                    <div class="flex-fill mr-1"><a href="{% url 'mandaMonitoringPostImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'unlockMonitoringPostImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a></div>
+                                    {% endif %}
+                                  {% else %}
+                                    {% if data.is_approved == True %}
+                                      Aprova ona
+                                    {% else %}
+                                      Manda ona
+                                    {% endif %}
+                                  {% endif %}
+                                </div>    
+                              </td>
+                            </tr>
+                            {% endfor %}
+
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                </div>
+            </div><!--end col-->
+          </div><!--end row-->
+
+        </div>
+      </section>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        var table = $('#example').removeAttr('width').DataTable( {
+            
+        });
+    } );
+
+
+</script>
+
+{% endblock %}

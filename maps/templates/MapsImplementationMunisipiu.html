@@ -1,0 +1,219 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block headStyle %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+{% endblock %}
+{% block content %}
+	<section>
+          <header class="container"> 
+            <ol class="breadcrumb mb-1 mt-1">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'DashMaps' %}">Dashboard Mapa</a></li>
+              <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+            </ol>
+          </header>
+        <div class="container mt-5 ">
+          <!-- Page Header-->
+                    {% if messages %}
+                        {% for message in messages %} 
+                            <div id="divmessage" class="alert alert-{{ message.tags }} alert-dismissable">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                              {{message}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+          <div class="row mt-4">
+            <div class="col-sm-2">
+              <table class="table table-sm table-striped">
+              {% if request.user.groups.all.0.name == 'admin' or request.user.groups.all.0.name == 'dir' %}
+              {% for data in rightSideObjects %}
+                <tr><td><a href="{% url 'MapaImplementasaunPostu' data.hashed %}">{{ data.name }} <span class="badge badge-info">({{ data.totData }})</span></a></td></tr>
+              {% endfor %}
+              {% endif %}
+              </table>
+            </div>
+            <div class="col-sm-10">
+                <ul class="breadcrumb bg-dark">
+                  <li class="breadcrumb-item text"><a class="text-white" href="{% url 'DashMaps' %}">All</a></li>
+                  {% for data in topSideObjects %}
+                  <li class="breadcrumb-item text"><a class="text-white" href="{% url 'home' %}">{{ data.name }} <span class="badge badge-info"> ({{ data.totData }})</span></a></li>
+                  {% endfor %}
+                </ul>
+                <div id="map" style="width: 100%;height: 400px"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+<!-- maps script -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoukaK1udD0Z4erUsxwkYzRKTOWmJid34"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoukaK1udD0Z4erUsxwkYzRKTOWmJid34&libraries=places"></script>
+<script>
+var addressPoints1 = [
+  {% for i in mapaImplementasaun1 %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a><br/>Status : {{i.implementasaun.statusImplementasaun}}"],
+  {% endfor %}
+]
+var addressPoints2 = [
+  {% for i in mapaImplementasaun2 %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a><br/>Status : {{i.implementasaun.statusImplementasaun}}"],
+  {% endfor %}
+]
+var addressPoints3 = [
+  {% for i in mapaImplementasaun3 %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a><br/>Status : {{i.implementasaun.statusImplementasaun}}"],
+  {% endfor %}
+]
+var addressPoints4 = [
+  {% for i in mapaImplementasaun4 %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a><br/>Status : {{i.implementasaun.statusImplementasaun}}"],
+  {% endfor %}
+]
+var addressPoints5 = [
+  {% for i in mapaImplementasaun5 %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a><br/>Status : {{i.implementasaun.statusImplementasaun}}"],
+  {% endfor %}
+]
+//maps layer
+var googleMaps = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {attribution: 'Google Maps',maxZoom: 20,subdomains:['mt0','mt1','mt2','mt3']});
+var openStreetMaps = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+                              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                              maxZoom: 18,id: 'mapbox/streets-v11',tileSize: 512,zoomOffset: -1,accessToken: 'pk.eyJ1IjoibG9iYXRvcGVyZWlyYSIsImEiOiJja2duaW8zOWcyMXFkMnp0ZWFjcm54M2xmIn0.C_ag6jiaMLzA8mz2hPc6xQ'
+                          });
+//maps layer
+
+var user_location = [-8.42565,125.32489084];
+var map = L.map('map',{
+    center: user_location,
+    zoom: 8,
+    layers: [googleMaps,openStreetMaps]
+});
+//icon///////////////////
+var greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+var redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+var yellowIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+var greyIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+var orangeIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+//icon///////////////////
+
+var markers1 = L.markerClusterGroup();
+for (var i = 0; i < addressPoints1.length; i++) {
+  var a = addressPoints1[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title,
+    icon: greyIcon
+  });
+  marker.bindPopup(title);
+  markers1.addLayer(marker);
+}
+map.addLayer(markers1);
+
+var markers2 = L.markerClusterGroup();
+for (var i = 0; i < addressPoints2.length; i++) {
+  var a = addressPoints2[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title,
+    icon:yellowIcon
+  });
+  marker.bindPopup(title);
+  markers2.addLayer(marker);
+}
+map.addLayer(markers2);
+
+var markers3 = L.markerClusterGroup();
+for (var i = 0; i < addressPoints3.length; i++) {
+  var a = addressPoints3[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title,
+    icon: orangeIcon
+  });
+  marker.bindPopup(title);
+  markers3.addLayer(marker);
+}
+map.addLayer(markers3);
+
+var markers4 = L.markerClusterGroup();
+for (var i = 0; i < addressPoints4.length; i++) {
+  var a = addressPoints4[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title,
+    icon:redIcon
+  });
+  marker.bindPopup(title);
+  markers4.addLayer(marker);
+}
+map.addLayer(markers4);
+
+var markers5 = L.markerClusterGroup();
+for (var i = 0; i < addressPoints5.length; i++) {
+  var a = addressPoints5[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title,
+    icon:greenIcon
+  });
+  marker.bindPopup(title);
+  markers5.addLayer(marker);
+}
+map.addLayer(markers5);
+
+var baseMaps = {
+    "<span style='color: blue'>Street</span>": openStreetMaps,
+    "<span style='color: green'>Google Maps</span>": googleMaps,
+};
+
+var overlayMaps = {
+    "<span style='color: grey'>Not Start</span>": markers1,
+    "<span style='color: yellow'>On Going</span>": markers2,
+    "<span style='color: orange'>Pending</span>": markers3,
+    "<span style='color: red'>Abandone</span>": markers4,
+    "<span style='color: green'>Complate</span>": markers5
+};
+
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+</script>
+
+{% endblock %}

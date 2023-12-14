@@ -1,0 +1,97 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% block content %}
+<section>
+    <div class="container mt-2 border border-danger p-3">
+	      <!-- Page Header-->
+	    <header> 
+	        <ol class="breadcrumb mb-1 mt-1">
+	          <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+	          <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+	        </ol>
+	    </header>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="card shadow-lg pt-1 rounded">
+						<div class="card-body">
+							<center>
+								<h3>{{ title|upper }}</h3>
+							</center>
+							<hr/>
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="card bg-primary">
+										<div class="card-body" style="color: white;">
+											<center> SURVEY <h2 style="margin-bottom: 0;">
+												<a href="{% url 'ReportAllAprovedSurvey' %}" style="color: white; text-decoration: underline;">{{ tot_survey }}</a>
+											</h2></center>
+										</div>
+									</div>
+								</div><!--end col-->
+								<div class="col-sm-6">
+									<div class="card bg-info">
+										<div class="card-body" style="color: white;">
+											<center> IMPLEMENTASAUN PROGRAMA <h2 style="margin-bottom: 0;">
+												<a href="{% url 'ReportAllAprovedImplementation' %}" style="color: white; text-decoration: underline;">{{ tot_implementasaun }}</a>
+											</h2></center>
+										</div>
+									</div>
+								</div><!--end col-->
+
+							</div>
+							<hr/>
+							<div class="row mt-5">
+								<div class="col-sm-6">
+									<div class="card">
+										<div class="card-header text-center">Total Implementasaun Programa</div>
+										<div class="card-body">
+		                                    <canvas id="ChartSumariuPrograma" data-url="{% url 'ChartSumariuPrograma' %}"></canvas>
+										</div>
+									</div>
+								</div> <!--end col-->
+								<div class="col-sm-6">
+									<div class="card">
+										<div class="card-header text-center">Total Implementasaun Programa bazeia ba Status</div>
+										<div class="card-body">
+		                                    <canvas id="ChartStatusImplementasaunPrograma" data-url="{% url 'ChartStatusImplementasaunPrograma' %}"></canvas>
+										</div>
+									</div>
+								</div> <!--end col-->
+							</div><!--end row-->
+							<div class="row mt-5">
+								<div class="col-sm-6">
+									<div class="card">
+										<div class="card-header text-center">Total Implementasaun Programa bazeia ba Tinan</div>
+										<div class="card-body">
+		                                    <canvas id="ChartImplementasaunProgramaYear" data-url="{% url 'ChartImplementasaunProgramaYear' %}"></canvas>
+										</div>
+									</div>
+								</div> <!--end col-->
+								<div class="col-sm-6">
+									<div class="card">
+										<div class="card-header text-center">Total Implementasaun Programa bazeia ba Munisipiu</div>
+										<div class="card-body">
+		                                    <canvas id="ChartImplementasaunProgramaArea" data-url="{% url 'ChartImplementasaunProgramaArea' %}"></canvas>
+										</div>
+									</div>
+								</div> <!--end col-->
+							</div>
+						</div> <!--end card-body-->
+					</div> <!--end card-->
+				</div> <!--end col-->
+			</div> <!--end row-->
+	</div>
+</section>
+{% endblock %}
+{% block scripts %}
+<!-- Charts-->
+<script type="text/javascript">
+	$(document).ready( function () {
+		var table = $('#example').removeAttr('width').DataTable( {
+			
+		});
+	} );
+</script>
+<script src="{% static 'chart.js/Chart.min.js'%}"></script>
+<script src="{% static 'chart.js/custom_charts.js'%}"></script>
+{% endblock %}

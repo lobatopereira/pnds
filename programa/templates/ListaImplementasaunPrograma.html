@@ -1,0 +1,108 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block headStyle %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+{% endblock %}
+{% block content %}
+	<section>
+        <div class="container mt-5 border border-danger p-3">
+          <!-- Page Header-->
+          <header> 
+            <ol class="breadcrumb mb-1 mt-1">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+              <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+            </ol>
+          </header>
+                    {% if messages %}
+                        {% for message in messages %} 
+                            <div id="divmessage" class="alert alert-{{ message.tags }} alert-dismissable">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                              {{message}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between text-center">
+                  <div>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                     <!-- <a href="{% url 'addImplementasaun' %}" class="btn btn-sm btn-info mr-2" title="Add Data"> <i class="fa fa-plus-square"></i> Adisiona Implementasaun</a> -->
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table id="example"  class="table table-hover table-striped">
+                      <thead>
+                        <tr>
+                          <th>Nu</th>
+                          <th>Programa</th>
+                          <th>Suku</th>
+                          <th>Postu</th>
+                          <!-- <th>Munisipiu</th> -->
+                          <th>Data</th>
+                          <th>Status</th>
+                          <th>Progresu</th>
+                          <th class="text-center">Asaun</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for data in listaImplementasaun %}
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ data.programa }}</td>
+                          <td>{{ data.village }}</td>
+                          <td>{{ data.administrativepost }}</td>
+                          <!-- <td>{{ data.municipality }}</td> -->
+                          <td>{{ data.date|date:'d-M-Y' }}</td>
+                          <td>{{ data.statusImplementasaun }}</td>
+                           <td>{% if data.is_approved %}Aprova Ona{%else%}Seidauk Aprova{%endif%}
+                            {% if data.is_rejected %}<sub class="badge-secondary pr-1 pl-1">Rejeita</sub>{% elif data.is_sent == True and data.is_approved == False %}<sub class="badge-secondary pr-1 pl-1">Prosesu</sub>{%endif%}</td>
+                          <td>
+                            <div class="d-flex justify-content-center"> 
+                              {% if data.is_sent == False and data.is_rejected == False %}
+                                {% if data.is_locked == False %}
+                                <div class="flex-fill mr-1"><a href="{% url 'updateImplementasaun' data.hashed 'list' %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a></div>
+                                <div class="flex-fill mr-1"><a href="{% url 'lockImplementasaunPrograma' data.hashed 'list' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a></div>
+                                {% else %}
+                                <div class="flex-fill mr-1"><a href="{% url 'mandaImplementasaunPrograma' data.hashed 'list' %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a></div>
+                                <div class="flex-fill mr-1"><a href="{% url 'unlockImplementasaunPrograma' data.hashed 'list' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a></div>
+                                {% endif %}
+                              {% endif %}
+                              <div class="flex-fill mr-1"><a href="{% url 'detalluImplementasaunPrograma' data.hashed %}" class="btn btn-sm btn-info" title="Detallu Programa"><i class="fa fa-list"></i> </a></div>
+                            </div> 
+                          </td>
+                        </tr>
+                        {% endfor %}
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+            <hr/>
+            <ol class="breadcrumb mb-2 mt-1">
+                <li class="breadcrumb-item"><a href="{% url 'ListaImplementasaun' %}">All</a></li>
+            {% for t in sumariuPrograma %}
+                <li class="breadcrumb-item"><a href="{% url 'listaImplementasaunPrograma' t.hashed %}">{{ t.naran }} <span class="badge badge-warning">{{ t.totalImplementasaun }}</span></a></li>
+            {% endfor %}
+            </ol>
+          
+        </div>
+      </section>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        var table = $('#example').removeAttr('width').DataTable( {
+            
+        });
+    } );
+</script>
+{% endblock %}

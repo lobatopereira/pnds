@@ -1,0 +1,81 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block headStyle %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+{% endblock %}
+{% block content %}
+	<section>
+          <header class="container"> 
+            <ol class="breadcrumb mb-1 mt-1">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'ListaImplementasaun' %}">Lista Implementasaun Programa</a></li>
+              <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+            </ol>
+          </header>
+        <div class="container mt-5 ">
+          <!-- Page Header-->
+                    {% if messages %}
+                        {% for message in messages %} 
+                            <div id="divmessage" class="alert alert-{{ message.tags }} alert-dismissable">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                              {{message}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+          <div class="row mt-4">
+            <div class="col-sm-10">
+                <div id="map" style="width: 100%;height: 400px"></div>
+                <ul class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="{% url 'home' %}">All</a></li>
+                  {% for oam in obj_oams %}
+                  <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ oam.0.code }} ({{ oam.1 }})</a></li>
+                  {% endfor %}
+                </ul>
+            </div>
+            <div class="col-sm-2">
+              <table class="table table-sm table-striped">
+                <tr><th>Municipiu</th></tr>
+              {% for mun in obj_muns %}
+                <tr><td><a href="{% url 'map-clubs-mun' mun.0.id %}">{{ mun.0.name }} ({{ mun.1 }})</a></td></tr>
+              {% endfor %}
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+<!-- maps script -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoukaK1udD0Z4erUsxwkYzRKTOWmJid34"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDoukaK1udD0Z4erUsxwkYzRKTOWmJid34&libraries=places"></script>
+<script>
+var addressPoints = [
+  {% for i in mapaImplementasaun %}
+    [{{i.latitude|safe}},{{i.longitude|safe}},"Programa: {{i.implementasaun.programa|safe}}<br/>Suku : <a href='{% url 'detalluImplementasaunPrograma' i.implementasaun.hashed %}'>{{i.implementasaun.village|safe}}</a>"],
+  {% endfor %}
+]
+var user_location = [-8.42565,125.32489084];
+var map = L.map('map').setView(user_location, 8);
+
+L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+attribution: 'Google Maps',
+maxZoom: 20,
+subdomains:['mt0','mt1','mt2','mt3']
+}).addTo(map);
+var markers = L.markerClusterGroup();
+for (var i = 0; i < addressPoints.length; i++) {
+  var a = addressPoints[i];
+  var title = a[2];
+  var marker = L.marker(new L.LatLng(a[0], a[1]), {
+    title: title
+  });
+  marker.bindPopup(title);
+  markers.addLayer(marker);
+}
+map.addLayer(markers);
+</script>
+
+{% endblock %}

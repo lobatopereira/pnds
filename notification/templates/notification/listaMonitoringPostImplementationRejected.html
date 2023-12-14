@@ -1,0 +1,99 @@
+{% extends "main/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<section>
+        <div class="container mt-5 border border-danger p-3">
+          <!-- Page Header-->
+          <header> 
+            <ol class="breadcrumb mb-1 mt-1">
+              <li class="breadcrumb-item"><a href="{% url 'home' %}">Varanda</a></li>
+              <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+            </ol>
+          </header>
+                    {% if messages %}
+                        {% for message in messages %} 
+                            <div id="divmessage" class="alert alert-{{ message.tags }} alert-dismissable">
+                              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                              {{message}}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+          {% if page == "notifList" %}
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between text-center">
+                  <div class="d-flex justify-content-between">
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table id="example"  class="table table-hover table-striped">
+                      <thead>
+                        <tr>
+                          <th>Nu</th>
+                          <th>Programa</th>
+                          <th>Suku</th>
+                          <th class="text-center"><i class="fa fa-image"></i></th>
+                          <th>Data Monitoring</th>
+                          <th>Kondisaun</th>
+                          <th>Deskrisaun</th>
+                          <th>Rekomendasaun</th>
+                          <th>Info Rejeita</th>
+                          <th>Status</th>
+                          <th class="text-center">Asaun</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for data in objects %}
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ data.implementasaun.programa }}</td>
+                          <td>{{ data.implementasaun.village }}</td>
+                          <td class="text-center">{% if data.image %}<a href="{{data.image.url}}" target="_blank"><img src="{{data.image.url}}" width="50px" height="50px"></a>{%else%}{%endif%}</td>
+                          <td>{{ data.monitoring_date }}</td>
+                          <td>{{ data.kondisaun }}</td>
+                          <td>{{ data.komentariu }}</td>
+                          <td>{{ data.rekomendasaun }} </td>
+                          <td class="text-danger">{{data.rejected_info}}</td>
+                          <td>{% if data.is_approved %}Aprova Ona{%else%}Seidauk Aprova{%endif%}
+                            {% if data.is_rejected %}<sub class="badge-secondary pr-1 pl-1">Rejeita</sub>{% elif data.is_sent == True and data.is_approved == False %}<sub class="badge-secondary pr-1 pl-1">Prosesu</sub>{%endif%}</td>
+                          <td>
+                            <div class="d-flex justify-content-center"> 
+                              {% if data.is_sent == False and data.is_rejected == True %}
+                                {% if data.is_locked == False %}
+                                <div class="flex-fill mr-1"><a href="{% url 'updateMonitoringPostImplementasaun' data.hashed 'notifList'  %}" class="btn btn-sm btn-success" title="Altera Implementasaun Programa"><i class="fa fa-pencil"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'lockMonitoringPostImplementasaunPrograma' data.hashed 'notifList' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-lock"></i> </a></div>
+                                {% else %}
+                                <div class="flex-fill mr-1"><a href="{% url 'mandaMonitoringPostImplementasaunPrograma' data.hashed 'notifList' %}" class="btn btn-sm btn-warning" title="Manda"><i class="fa fa-send"></i> </a></div>
+                                    <div class="flex-fill mr-1"><a href="{% url 'unlockMonitoringPostImplementasaunPrograma' data.hashed 'notifList' %}" class="btn btn-sm btn-danger" title="Xave dadus"><i class="fa fa-unlock"></i> </a></div>
+                                {% endif %}
+                              {% endif %}
+                            </div>  
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {%endif%}
+          {% if page == "notifDetail" %}
+          
+          {%endif%}
+        </div>
+      </section>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        var table = $('#example').removeAttr('width').DataTable( {
+            
+        });
+    } );
+</script>
+{% endblock %}
